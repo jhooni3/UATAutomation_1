@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UAT Automation</title>
+    <script src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
+</head>
+
+<!--테스트시나리오 컴포넌트-->
+<template id="TestScenario">
+    <div>
+            <h3>테스트 시나리오</h3>
+            <table border="1">
+                <thead>
+                    <th>시나리오ID</th>
+                    <th>시나리오명</th>
+                </thead>
+                <tbody>
+                    <tr v-for="testScenario in testScenarioList" :key="testScenario.tsId"
+                        @click="clickTsId(testScenario.tsId)">
+                        <td>{{testScenario.tsId}}</td>
+                        <td>{{testScenario.tsName}}</td>
+                    </tr>
+                </tbody>
+            </table>
+    </div>
+</template>
+<script>
+    Vue.component("TestScenario", {
+        template: "#TestScenario",
+        data : function () {
+            return {
+                testScenarioList:[
+                    {tsId :"ts1", tsName :"시나리오1"},
+                    {tsId :"ts2", tsName :"시나리오2"},
+                    {tsId :"ts3", tsName :"시나리오3"},
+                    {tsId :"ts4", tsName :"시나리오4"},
+                ],
+            }
+        },
+        methods:{
+            clickTsId : function (tsId) {
+                eventBus.$emit("clickTsId", tsId)
+            }
+        }
+    })
+</script>
+<style>
+
+</style>
+
+<!--테스트케이스 컴포넌트-->
+<template id ="TestCase">
+    <div>
+        <table border="1">
+            <thead>
+                <th>케이스ID</th>
+                <th>케이스명</th>
+                <th>시나리오ID</th>
+            </thead>
+            <tbody>
+                <tr v-for="testCase in testCaseList" :key ="testCase.tcId">
+                    <td>{{testCase.tcId}}</td>
+                    <td>{{testCase.tcName}}</td>
+                    <td>{{testCase.tsId}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</template>
+<script>
+    Vue.component("TestCase", {
+        template: "#TestCase",
+        data: function () {
+            return {
+                originTestCaseList:[
+                    {tcId:"tc1", tcName:"테스트케이스1", tsId: "ts1"},
+                    {tcId:"tc2", tcName:"테스트케이스2", tsId: "ts2"},
+                    {tcId:"tc3", tcName:"테스트케이스3", tsId: "ts2"},
+                    {tcId:"tc4", tcName:"테스트케이스4", tsId: "ts3"},
+                    {tcId:"tc5", tcName:"테스트케이스5", tsId: "ts4"},
+                ],
+                testCaseList:[
+
+                ],
+
+            }
+        },
+        created: function () {
+            this.testCaseList = [...this.originTestCaseList]    //복
+            eventBus.$on("clickTsId", this.filterTestCase)
+        },
+        methods:{
+            filterTestCase: function(tsId) {
+                console.log("filterTestCase : "+ tsId)
+                //tsId가 동일한놈만 원본데이터를
+                this.testCaseList = this.originTestCaseList.filter(function (row) {
+                    return row.tsId === tsId
+                })
+            }
+        }
+    })
+</script>
+<style>
+
+</style>
+
+<!--테스트실행 컴포넌트-->
+<template id ="TestExecution">
+    <div>
+        <test-scenario></test-scenario>
+        <test-case></test-case>
+        <button @click="execution">실 행</button>
+    </div>
+</template>
+<script>
+    Vue.component("TestExecution", {
+        template:"#TestExecution",
+        data:{
+
+        },
+        methods:{
+            execution: function () {
+                alert("실행")
+            }
+        }
+    })
+</script>
+<style>
+
+</style>
+
+<!--테스트히스토리 컴포넌트-->
+<template id="TestHistory">
+    <div>
+        <table border="1">
+            <thead>
+                <th>일자</th>
+                <th>시각</th>
+                <th>시나리오아이디</th>
+            </thead>
+            <tbody>
+                <tr v-for="testHistory in testHistoryList" :key="testHistory.time">
+                    <td>{{testHistory.date}}</td>
+                    <td>{{testHistory.time}}</td>
+                    <td>{{testHistory.tsId}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</template>
+<script>
+    Vue.component("TestHistory", {
+        template:"#TestHistory",
+        data: function () {
+            return {
+                testHistoryList:[
+                    {date:"20190606", time:"010000", tsId:"ts1"},
+                    {date:"20190607", time:"020000", tsId:"ts2"},
+                    {date:"20190606", time:"030000", tsId:"ts1"},
+                    {date:"20190606", time:"050000", tsId:"ts1"},
+                ]
+            }
+        }
+    })
+</script>
+<style>
+
+</style>
+
+<!--네비게이션 컴포넌트-->
+<template id="navigation">
+    <div>
+        <a href="#" @click="changeTestExecution">[테스트실행]</a>
+        <a href="#" @click="changeTestHistory">[실행 내역]</a>
+    </div>
+</template>
+<script>
+    Vue.component("navigation",{
+        template: "#navigation",
+        methods: {
+            changeTestExecution: function () {
+                eventBus.$emit("changeTestExecution", "TestExecution") // 첫번째 식별자 , 두번째 전달 데이터
+            },
+            changeTestHistory: function () {
+                eventBus.$emit("changeTestHistory","TestHistory")
+            }
+        }
+    })
+</script>
+<style>
+
+</style>
+
+<!--홈 컴포넌트-->
+<template id="home">
+    <div>
+        <header>
+            <h1 align="center">UAT Automation</h1>
+        </header>
+        <nav>
+            <navigation></navigation>
+        </nav>
+        <section>
+            <test-execution v-if="currentComponent == 'TestExecution'"></test-execution>
+            <test-history v-else-if ="currentComponent == 'TestHistory'"></test-history>
+        </section>
+        <footer>
+            copyright 2019 @muzi
+        </footer>
+    </div>
+</template>
+<script>
+    Vue.component("home",{
+        template:"#home",
+        data: function () {
+            return {
+                currentComponent: "TestExecution",
+            }
+        },
+        methods: {
+            changeCurrentComponent : function (param1) {
+                this.currentComponent = param1
+            }
+        },
+        created: function () {
+            eventBus.$on("changeTestExecution", this.changeCurrentComponent)
+            eventBus.$on("changeTestHistory", this.changeCurrentComponent)
+        }
+    })
+</script>
+<style>
+
+</style>
+
+
+<!--body-->
+<body>
+    <div id="app">
+        <!--화면에 뷰잉하는 코드는 여기에 작성-->
+        <home></home>
+    </div>
+</body>
+<!--이벤트버스-->
+<script>
+    var eventBus = new Vue();
+</script>
+<!--main vue 인스턴스-->
+<script>
+    var vm = new Vue(
+        {
+            el: "#app",
+            data: function () {
+                return {
+
+                }
+            }
+        }
+    )
+</script>
+
+
+
+</html>
