@@ -4,25 +4,26 @@
     <meta charset="UTF-8">
     <title>UAT Automation</title>
     <script src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 
 <!--테스트시나리오 컴포넌트-->
 <template id="TestScenario">
     <div>
-            <h3>테스트 시나리오</h3>
-            <table border="1">
-                <thead>
-                    <th>시나리오ID</th>
-                    <th>시나리오명</th>
-                </thead>
-                <tbody>
-                    <tr v-for="testScenario in testScenarioList" :key="testScenario.tsId"
-                        @click="clickTsId(testScenario.tsId)">
-                        <td>{{testScenario.tsId}}</td>
-                        <td>{{testScenario.tsName}}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <h3>테스트 시나리오</h3>
+        <table class="table" >
+            <thead>
+                <th>시나리오ID</th>
+                <th>시나리오명</th>
+            </thead>
+            <tbody>
+                <tr v-for="testScenario in testScenarioList" :key="testScenario.tsId"
+                    @click="clickTsId(testScenario.tsId)">
+                    <td>{{testScenario.tsId}}</td>
+                    <td>{{testScenario.tsName}}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </template>
 <script>
@@ -52,7 +53,8 @@
 <!--테스트케이스 컴포넌트-->
 <template id ="TestCase">
     <div>
-        <table border="1">
+        <h3>테스트 케이스</h3>
+        <table class="table">
             <thead>
                 <th>케이스ID</th>
                 <th>케이스명</th>
@@ -110,15 +112,12 @@
     <div>
         <test-scenario></test-scenario>
         <test-case></test-case>
-        <button @click="execution">실 행</button>
+        <button type="button" class="btn btn-outline-dark" @click="execution">실 행</button>
     </div>
 </template>
 <script>
     Vue.component("TestExecution", {
         template:"#TestExecution",
-        data:{
-
-        },
         methods:{
             execution: function () {
                 alert("실행")
@@ -133,7 +132,8 @@
 <!--테스트히스토리 컴포넌트-->
 <template id="TestHistory">
     <div>
-        <table border="1">
+        <h3>테스트 실행내역</h3>
+        <table class="table">
             <thead>
                 <th>일자</th>
                 <th>시각</th>
@@ -172,8 +172,17 @@
 <!--네비게이션 컴포넌트-->
 <template id="navigation">
     <div>
-        <a href="#" @click="changeTestExecution">[테스트실행]</a>
-        <a href="#" @click="changeTestHistory">[실행 내역]</a>
+<!--        <a href="#" @click="changeTestExecution">[테스트실행]</a>-->
+<!--        <a href="#" @click="changeTestHistory">[실행 내역]</a>-->
+        <nav class="navbar navbar-light bg-light">
+            <a class="navbar-brand" href="#">
+                HelloVue!
+            </a>
+            <a class="nav-link" href="#" @click="changeTestExecution">테스트실행</a>
+            <a class="nav-link" href="#" @click="changeTestHistory">실행내역</a>
+            <a class="nav-link" href="#" @click="changeETC">기타등등</a>
+        </nav>
+
     </div>
 </template>
 <script>
@@ -185,6 +194,9 @@
             },
             changeTestHistory: function () {
                 eventBus.$emit("changeTestHistory","TestHistory")
+            },
+            changeETC: function () {
+                eventBus.$emit("changeETC","changeETC")
             }
         }
     })
@@ -197,7 +209,9 @@
 <template id="home">
     <div>
         <header>
-            <h1 align="center">UAT Automation</h1>
+            <div class="alert alert-primary" role="alert">
+                <h1 align="center">UAT Automation</h1>
+            </div>
         </header>
         <nav>
             <navigation></navigation>
@@ -205,6 +219,7 @@
         <section>
             <test-execution v-if="currentComponent == 'TestExecution'"></test-execution>
             <test-history v-else-if ="currentComponent == 'TestHistory'"></test-history>
+            <div v-else><h2> Page Not Found!!!!! </h2></div>
         </section>
         <footer>
             copyright 2019 @muzi
@@ -227,6 +242,7 @@
         created: function () {
             eventBus.$on("changeTestExecution", this.changeCurrentComponent)
             eventBus.$on("changeTestHistory", this.changeCurrentComponent)
+            eventBus.$on("changeETC", this.changeCurrentComponent)
         }
     })
 </script>
@@ -251,11 +267,6 @@
     var vm = new Vue(
         {
             el: "#app",
-            data: function () {
-                return {
-
-                }
-            }
         }
     )
 </script>
